@@ -1,9 +1,6 @@
 import pygame
 import random
 
-
-грешка от Тати
-
 from pygame.locals import (
     K_UP,
     K_DOWN,
