@@ -19,7 +19,12 @@ class Player(pygame.sprite.Sprite):
         super(Player, self).__init__()
         self.surf = pygame.Surface((75, 25))
         self.surf.fill((0, 255, 65))
-        self.rect = self.surf.get_rect()
+        self.rect = self.surf.get_rect(
+            center=(
+            SCREEN_HEIGHT/2, 
+            SCREEN_WIDTH/2
+            )
+        )
 
     def update(self, pressed_keys):
         if pressed_keys[K_UP]:
@@ -50,8 +55,7 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = self.surf.get_rect(
             center=(
                 random.randint(0, SCREEN_WIDTH),
-                random.randint(SCREEN_HEIGHT + 20, SCREEN_HEIGHT + 100),
-                
+                0
             )
         )
         self.speed = random.randint(5, 20)
@@ -59,7 +63,7 @@ class Enemy(pygame.sprite.Sprite):
     # Move the enemy based on speed
     # Remove it when it passes the left edge of the screen
     def update(self):
-        self.rect.move_ip(0, -self.speed)
+        self.rect.move_ip(0, self.speed)
         if self.rect.right < 0:
             self.kill()
 
