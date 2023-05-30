@@ -77,29 +77,39 @@ class Enemy(pygame.sprite.Sprite):
 
 # Creates a random symbol at a random place 
 class Symbol(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, x_cord, y_cord):
         super(Symbol, self).__init__()
+        self.x_cord = x_cord
+        self.y_cord = y_cord
         # Random symbol from the ASCII table (33->'!'; 126->'`')
         symbol = chr(random.randint(33, 126))
         self.surf = font.render(symbol, True, (0, 255, 65))
         self.rect = self.surf.get_rect()
         self.rect.center=(
-            random.randint(0, SCREEN_WIDTH),
-            SCREEN_HEIGHT - (random.randint(100,1000))
+            x_cord,
+            y_cord + 25
         )
 
 # Starts a chain of symbols from the top
 class Chain(pygame.sprite.Sprite):
+
     def __init__(self):
         super(Chain, self).__init__()
+        self.end_of_chain = True
+        self.x_cord = random.randint(0, SCREEN_WIDTH)
+        self.y_cord = 15
         # Random symbol from the ASCII table (33->'!'; 126->'`')
         symbol = chr(random.randint(33, 126))
         self.surf = font.render(symbol, True, (0, 255, 65))
         self.rect = self.surf.get_rect()
         self.rect.center=(
-            random.randint(0, SCREEN_WIDTH),
-            15
+            self.x_cord,
+            self.y_cord
         )
+    
+    def update(self):
+        if not self.end_of_chain:
+            self.remove(chain)
 
 pygame.init()
 
@@ -114,16 +124,17 @@ pygame.time.set_timer(ADDENEMY, 250)
 
 # Custom event to create a new symbol
 ADDSYMBOL = pygame.USEREVENT + 2
-pygame.time.set_timer(ADDSYMBOL, 250)
+pygame.time.set_timer(ADDSYMBOL, 450)
 
 # Custom event to create a new chain of symbols
 CREATECHAIN = pygame.USEREVENT + 3
-pygame.time.set_timer(CREATECHAIN, 2000)
+pygame.time.set_timer(CREATECHAIN, 1000)
 
 player = Player()
 
 enemies = pygame.sprite.Group()
 symbols = pygame.sprite.Group()
+chain = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
 
@@ -141,23 +152,33 @@ while running:
             enemies.add(new_enemy)
             all_sprites.add(new_enemy)
         elif event.type == ADDSYMBOL:
-            new_symbol = Symbol()
-            symbols.add(new_symbol)
-            all_sprites.add(new_symbol)
+            #new_symbol = Symbol()
+            #symbols.add(new_symbol)
+            #all_sprites.add(new_symbol)
+            # Add another symbol to every chain
+            for entity in chain:
+                new_symbol = Symbol(entity.x_cord, entity.y_cord)
+                chain.add(new_symbol)
+                all_sprites.add(new_symbol)
+                entity.end_of_chain = False
         elif event.type == CREATECHAIN:
-            new_symbol = Chain()
-            symbols.add(new_symbol)
-            all_sprites.add(new_symbol)
+            new_chain = Chain()
+            chain.add(new_chain)
+            all_sprites.add(new_chain)
 
     pressed_keys = pygame.key.get_pressed()
     player.update(pressed_keys)
     enemies.update()
+    chain.update()
     
     screen.fill((13, 2, 8))
 
     for entity in all_sprites:
         screen.blit(entity.surf, entity.rect)
     
+    if pygame.sprite.spritecollideany(player, chain):
+        running = False
+
     pygame.display.flip()
     clock.tick(30)
 
