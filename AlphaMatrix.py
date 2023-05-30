@@ -11,18 +11,19 @@ from pygame.locals import (
     KEYDOWN,
     QUIT,
 )
-#from pygame.sprite import _Group
 
-# Screen size
+# Constants
 SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 1080
+FONT_SIZE = 40
 
 # Player
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super(Player, self).__init__()
-        self.surf = pygame.Surface((75, 25))
-        self.surf.fill((0, 255, 65))
+        #self.surf = pygame.Surface((75, 25))
+        self.surf = pygame.image.load("Average_red_pill_enjoyer.png").convert_alpha()
+        #self.surf.fill((0, 255, 65))
         self.rect = self.surf.get_rect(
             center=(
             SCREEN_HEIGHT/2, 
@@ -74,6 +75,7 @@ class Enemy(pygame.sprite.Sprite):
         if self.rect.right < 0:
             self.kill()
 
+# Creates a random symbol at a random place 
 class Symbol(pygame.sprite.Sprite):
     def __init__(self):
         super(Symbol, self).__init__()
@@ -86,10 +88,21 @@ class Symbol(pygame.sprite.Sprite):
             SCREEN_HEIGHT - (random.randint(100,1000))
         )
 
+# Starts a chain of symbols from the top
+class Chain(pygame.sprite.Sprite):
+    def __init__(self):
+        super(Chain, self).__init__()
+        # Random symbol from the ASCII table (33->'!'; 126->'`')
+        symbol = chr(random.randint(33, 126))
+        self.surf = font.render(symbol, True, (0, 255, 65))
+        self.rect = self.surf.get_rect()
+        self.rect.center=(
+            random.randint(0, SCREEN_WIDTH),
+            15
+        )
+
 pygame.init()
 
-#Text
-FONT_SIZE = 40
 font = pygame.font.Font(None, FONT_SIZE)
 
 clock = pygame.time.Clock()
@@ -102,6 +115,10 @@ pygame.time.set_timer(ADDENEMY, 250)
 # Custom event to create a new symbol
 ADDSYMBOL = pygame.USEREVENT + 2
 pygame.time.set_timer(ADDSYMBOL, 250)
+
+# Custom event to create a new chain of symbols
+CREATECHAIN = pygame.USEREVENT + 3
+pygame.time.set_timer(CREATECHAIN, 2000)
 
 player = Player()
 
@@ -127,13 +144,17 @@ while running:
             new_symbol = Symbol()
             symbols.add(new_symbol)
             all_sprites.add(new_symbol)
+        elif event.type == CREATECHAIN:
+            new_symbol = Chain()
+            symbols.add(new_symbol)
+            all_sprites.add(new_symbol)
 
     pressed_keys = pygame.key.get_pressed()
     player.update(pressed_keys)
     enemies.update()
     
     screen.fill((13, 2, 8))
-    #screen.blit(single_symbol, single_symbolRect)
+
     for entity in all_sprites:
         screen.blit(entity.surf, entity.rect)
     
