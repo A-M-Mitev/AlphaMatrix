@@ -178,12 +178,12 @@ speed_modifier = 1 # Normal
 
 # Custom event to create a new symbol
 ADDSYMBOL = pygame.USEREVENT + 1
-symbol_interval = 300  # ms
+symbol_interval = 200 # ms
 pygame.time.set_timer(ADDSYMBOL, int(symbol_interval / speed_modifier))
 
 # Custom event to create a new chain of symbols
 CREATECHAIN = pygame.USEREVENT + 2
-chain_interval = 600  # ms
+chain_interval = 450  # ms
 pygame.time.set_timer(CREATECHAIN, int(chain_interval / speed_modifier))
 
 player = Player()
@@ -244,7 +244,7 @@ while running:
     screen.fill((0, 0, 0))
 
     # Adjust the game speed based on the speed modifier
-    speed_adjusted = int(speed_modifier * 60)
+    speed_adjusted = int(speed_modifier * 50)
     clock.tick(speed_adjusted)
 
 
