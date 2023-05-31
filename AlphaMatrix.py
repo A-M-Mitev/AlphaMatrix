@@ -30,7 +30,7 @@ class Player(pygame.sprite.Sprite):
             )
         )
         # Define the size of the hitbox relative to the image
-        hitbox_width = self.rect.width * 0.65
+        hitbox_width = self.rect.width * 0.6
         hitbox_height = self.rect.height
         # Create the hitbox surface
         self.hitbox = pygame.Surface((hitbox_width, hitbox_height))
@@ -77,28 +77,6 @@ class Player(pygame.sprite.Sprite):
             self.rect.top = 0
         if self.rect.bottom >= SCREEN_HEIGHT:
             self.rect.bottom = SCREEN_HEIGHT
-
-
-class Enemy(pygame.sprite.Sprite):
-    def __init__(self):
-        super(Enemy, self).__init__()
-        self.surf = pygame.Surface(( 20, 10))
-        self.surf.fill((69, 255, 255))
-        # The starting position is randomly generated, as is the speed
-        self.rect = self.surf.get_rect(
-            center=(
-                random.randint(0, SCREEN_WIDTH),
-                0
-            )
-        )
-        self.speed = random.randint(5, 20)
-
-    # Move the enemy based on speed
-    # Remove it when it passes the left edge of the screen
-    def update(self):
-        self.rect.move_ip(0, self.speed)
-        if self.rect.right < 0:
-            self.kill()
 
 # Places a random symbol on given cordinates
 class Symbol(pygame.sprite.Sprite):
@@ -173,10 +151,10 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
 # Custom event to create a new symbol
 ADDSYMBOL = pygame.USEREVENT + 1
-pygame.time.set_timer(ADDSYMBOL, 150)
+pygame.time.set_timer(ADDSYMBOL, 300)
 # Custom event to create a new chain of symbols
 CREATECHAIN = pygame.USEREVENT + 2
-pygame.time.set_timer(CREATECHAIN, 300)
+pygame.time.set_timer(CREATECHAIN, 600)
 
 player = Player()
 
@@ -226,13 +204,15 @@ while running:
     for entity in all_sprites:
         screen.blit(entity.surf, entity.rect)
     screen.blit(player.image, player.rect)
-    screen.blit(player.hitbox, player.rect_hitbox)
+    # screen.blit(player.hitbox, player.rect_hitbox) 
     
-    # Game ends when you touch a symbol
-   # if pygame.sprite.spritecollideany(player, symbols):
-      #  running = False
+    # Checks if any of the symbols collide with the player's hitbox
+    # by using their rectangles
+    for entity in symbols:
+        if entity.rect.colliderect(player.rect_hitbox):
+            running = False
 
     pygame.display.flip()
-    clock.tick(60)
+    clock.tick(30)
 
 pygame.quit()
