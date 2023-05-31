@@ -48,7 +48,7 @@ class Player(pygame.sprite.Sprite):
 
     # Basic movement
     def update(self, pressed_keys):
-        speed = 15 * speed_modifier  
+        speed = 15 * speed_modifier
 
         if pressed_keys[K_w]:
             self.rect.move_ip(0, -speed)
@@ -101,7 +101,7 @@ class Player(pygame.sprite.Sprite):
         if self.rect_hitbox.right > SCREEN_WIDTH - 26:
             self.rect_hitbox.right = SCREEN_WIDTH - 26
     
-# Places a random symbol on given cordinates
+# Places a random symbol on given coordinates
 class Symbol(pygame.sprite.Sprite):
     def __init__(self, x_cord, y_cord, age):
         super(Symbol, self).__init__()
@@ -124,7 +124,7 @@ class Symbol(pygame.sprite.Sprite):
         # Delete after reaching bottom
         if self.rect.bottom >= (SCREEN_HEIGHT):
             self.kill()
-        # Changing colour
+        # Changing color
         if self.age == self.age_of_chain - 2:
             self.surf = font.render(self.symbol, True, (0, 143, 17))
         if self.age == 3 or self.age == 4:
@@ -134,10 +134,9 @@ class Symbol(pygame.sprite.Sprite):
 
 # Starts a chain of symbols from the top
 class Chain(pygame.sprite.Sprite):
-
     def __init__(self):
         super(Chain, self).__init__()
-        # Lenght of chain is between 7 and 15 symbols
+        # Length of chain is between 7 and 15 symbols
         self.age_of_chain = random.randint(7, 15)
         self.age = self.age_of_chain
         self.x_cord = random.randint(0, SCREEN_WIDTH)
@@ -157,7 +156,7 @@ class Chain(pygame.sprite.Sprite):
         # Delete after reaching bottom
         if self.rect.bottom >= (SCREEN_HEIGHT):
             self.kill()
-        # Changing colour
+        # Changing color
         if self.age == self.age_of_chain - 2:
             self.surf = font.render(self.symbol, True, (0, 143, 17))
         if self.age == self.age_of_chain - 3:
@@ -174,17 +173,17 @@ clock = pygame.time.Clock()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
 # Speed of game
-speed_modifier = 1 # Normal
+speed_modifier = 1  # Normal
 
 # Custom event to create a new symbol
-ADDSYMBOL = pygame.USEREVENT + 1
-symbol_interval = 200 # ms
-pygame.time.set_timer(ADDSYMBOL, int(symbol_interval / speed_modifier))
+ADD_SYMBOL = pygame.USEREVENT + 1
+symbol_interval = 200  # ms
+pygame.time.set_timer(ADD_SYMBOL, int(symbol_interval / speed_modifier))
 
 # Custom event to create a new chain of symbols
-CREATECHAIN = pygame.USEREVENT + 2
+CREATE_CHAIN = pygame.USEREVENT + 2
 chain_interval = 450  # ms
-pygame.time.set_timer(CREATECHAIN, int(chain_interval / speed_modifier))
+pygame.time.set_timer(CREATE_CHAIN, int(chain_interval / speed_modifier))
 
 player = Player()
 
@@ -192,7 +191,7 @@ enemies = pygame.sprite.Group()
 symbols = pygame.sprite.Group()
 chain = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
-#all_sprites.add(player)
+# all_sprites.add(player)
 
 # The loop
 running = True
@@ -205,19 +204,19 @@ while running:
                 # Decrease game speed when LSHIFT is pressed
                 speed_modifier = 0.4
                 # Adjust symbol and chain event timers
-                pygame.time.set_timer(ADDSYMBOL, int(symbol_interval / speed_modifier))
-                pygame.time.set_timer(CREATECHAIN, int(chain_interval / speed_modifier))
+                pygame.time.set_timer(ADD_SYMBOL, int(symbol_interval / speed_modifier))
+                pygame.time.set_timer(CREATE_CHAIN, int(chain_interval / speed_modifier))
         elif event.type == KEYUP:
             if event.key == K_LSHIFT:
                 # Restore normal game speed when LSHIFT is released
                 speed_modifier = 1
                 # Adjust symbol and chain event timers
-                pygame.time.set_timer(ADDSYMBOL, int(symbol_interval / speed_modifier))
-                pygame.time.set_timer(CREATECHAIN, int(chain_interval / speed_modifier))
+                pygame.time.set_timer(ADD_SYMBOL, int(symbol_interval / speed_modifier))
+                pygame.time.set_timer(CREATE_CHAIN, int(chain_interval / speed_modifier))
         elif event.type == QUIT:
             running = False
-        elif event.type == ADDSYMBOL:
-            # Adds another symbol to every chain and makes it the new end of chain, 
+        elif event.type == ADD_SYMBOL:
+            # Adds another symbol to every chain and makes it the new end of chain,
             # whilst removing the previous one from the group
             for entity in chain:
                 new_symbol = Symbol(entity.x_cord, entity.y_cord + (FONT_SIZE - 15), entity.age_of_chain)
@@ -229,30 +228,29 @@ while running:
             for entity in symbols:
                 entity.age -= 1
 
-        # Starts a new chain of symbols        
-        elif event.type == CREATECHAIN:
+        # Starts a new chain of symbols
+        elif event.type == CREATE_CHAIN:
             new_chain = Chain()
             chain.add(new_chain)
             symbols.add(new_chain)
             all_sprites.add(new_chain)
-            
+
     pressed_keys = pygame.key.get_pressed()
     player.update(pressed_keys)
     enemies.update()
     symbols.update()
-    
+
     screen.fill((0, 0, 0))
 
     # Adjust the game speed based on the speed modifier
     speed_adjusted = int(speed_modifier * 50)
     clock.tick(speed_adjusted)
 
-
     for entity in all_sprites:
         screen.blit(entity.surf, entity.rect)
     screen.blit(player.image, player.rect)
-    #screen.blit(player.hitbox, player.rect_hitbox) # <-- Shows hitbox
-    
+    # screen.blit(player.hitbox, player.rect_hitbox) # <-- Shows hitbox
+
     # Checks if any of the symbols collide with the player's hitbox
     # by using their rectangles
     for entity in symbols:
@@ -263,3 +261,4 @@ while running:
     clock.tick(60)
 
 pygame.quit()
+
