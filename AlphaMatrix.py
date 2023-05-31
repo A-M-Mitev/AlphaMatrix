@@ -21,35 +21,52 @@ FONT_SIZE = 50
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super(Player, self).__init__()
-        self.hitbox = pygame.Surface((75, 25))
-        self.hitbox.fill((0,0,0))
-        self.rect_hitbox = self.hitbox.get_rect(
+        # Image
+        self.image = pygame.image.load("Average_red_pill_enjoyer.png").convert_alpha()
+        self.rect = self.image.get_rect(
             center=(
-            SCREEN_HEIGHT/2, 
-            SCREEN_WIDTH/2
+                SCREEN_WIDTH / 2,
+                SCREEN_HEIGHT / 2
             )
         )
-        self.surf = pygame.image.load("Average_red_pill_enjoyer.png").convert_alpha()
-        self.rect = self.surf.get_rect(
-            center=(
-            SCREEN_HEIGHT/2, 
-            SCREEN_WIDTH/2
-            )
-        )
+        # Define the size of the hitbox relative to the image
+        hitbox_width = self.rect.width * 0.65
+        hitbox_height = self.rect.height
+        # Create the hitbox surface
+        self.hitbox = pygame.Surface((hitbox_width, hitbox_height))
+        self.hitbox.fill((0, 0, 0))
+        self.rect_hitbox = self.hitbox.get_rect()
+        self.rect_hitbox.center = self.rect.center
+
     # Movement
     def update(self, pressed_keys):
         if pressed_keys[K_UP]:
             self.rect.move_ip(0, -10)
             self.rect_hitbox.move_ip(0, -10)
         if pressed_keys[K_DOWN]:
-          self.rect.move_ip(0, 10)
-          self.rect_hitbox.move_ip(0, 10)
-        if pressed_keys[K_LEFT]:
-          self.rect.move_ip(-10, 0)
-          self.rect_hitbox.move_ip(-10, 0)
-        if pressed_keys[K_RIGHT]:
-           self.rect.move_ip(10, 0)
-           self.rect_hitbox.move_ip(10, 0)
+            self.rect.move_ip(0, 10)
+            self.rect_hitbox.move_ip(0, 10)
+        # Makes sure the hitbox stays in the center of the image
+        if pressed_keys[K_LEFT] and self.rect.left > 5:
+            self.rect.move_ip(-10, 0)
+            self.rect_hitbox.move_ip(-10, 0)
+        if pressed_keys[K_RIGHT] and self.rect.right < SCREEN_WIDTH - 5:
+            self.rect.move_ip(10, 0)
+            self.rect_hitbox.move_ip(10, 0)
+
+        # Window borders
+        if self.rect.left < 0:
+            self.rect.left = 0
+          #  self.rect_hitbox.left = 0
+        if self.rect.right > SCREEN_WIDTH:
+            self.rect.right = SCREEN_WIDTH
+           # self.rect_hitbox.right = SCREEN_WIDTH
+        if self.rect.top <= 0:
+            self.rect.top = 0
+            self.rect_hitbox.top = 0
+        if self.rect.bottom >= SCREEN_HEIGHT:
+            self.rect.bottom = SCREEN_HEIGHT
+            self.rect_hitbox.bottom = SCREEN_HEIGHT
     
         # Window borders
         if self.rect.left < 0:
@@ -167,7 +184,7 @@ enemies = pygame.sprite.Group()
 symbols = pygame.sprite.Group()
 chain = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
-all_sprites.add(player)
+#all_sprites.add(player)
 
 # The loop
 running = True
@@ -208,11 +225,12 @@ while running:
 
     for entity in all_sprites:
         screen.blit(entity.surf, entity.rect)
+    screen.blit(player.image, player.rect)
     screen.blit(player.hitbox, player.rect_hitbox)
     
     # Game ends when you touch a symbol
-    if pygame.sprite.spritecollideany(player, symbols):
-        running = False
+   # if pygame.sprite.spritecollideany(player, symbols):
+      #  running = False
 
     pygame.display.flip()
     clock.tick(60)
