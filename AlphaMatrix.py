@@ -15,7 +15,7 @@ from pygame.locals import (
 # Constants
 SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 1080
-FONT_SIZE = 40
+FONT_SIZE = 50
 
 # Player
 class Player(pygame.sprite.Sprite):
@@ -103,19 +103,29 @@ class Symbol(pygame.sprite.Sprite):
     def update(self):
         if self.age == 0:
             self.kill()
+        # Delete after reaching bottom
+        if self.rect.bottom >= (SCREEN_HEIGHT):
+            self.kill()
+        # Changing colour
+        if self.age == self.age_of_chain - 2:
+            self.surf = font.render(self.symbol, True, (0, 143, 17))
+        if self.age == 3 or self.age == 4:
+            self.surf = font.render(self.symbol, True, (0, 59, 0))
+        if self.age == 2 or self.age == 1:
+            self.surf = font.render(self.symbol, True, (13, 20, 8))
 
 # Starts a chain of symbols from the top
 class Chain(pygame.sprite.Sprite):
 
     def __init__(self):
         super(Chain, self).__init__()
-        self.age_of_chain = random.randint(5, 15)
+        self.age_of_chain = random.randint(7, 15)
         self.age = self.age_of_chain
         self.x_cord = random.randint(0, SCREEN_WIDTH)
         self.y_cord = 15
         # Random symbol from the ASCII table (33->'!'; 126->'`')
-        symbol = chr(random.randint(33, 126))
-        self.surf = font.render(symbol, True, (0, 255, 65))
+        self.symbol = chr(random.randint(33, 126))
+        self.surf = font.render(self.symbol, True, (0, 255, 65))
         self.rect = self.surf.get_rect()
         self.rect.center=(
             self.x_cord,
@@ -125,6 +135,16 @@ class Chain(pygame.sprite.Sprite):
     def update(self):
         if self.age == 0:
             self.kill()
+        # Delete after reaching bottom
+        if self.rect.bottom >= (SCREEN_HEIGHT):
+            self.kill()
+        # Changing colour
+        if self.age == self.age_of_chain - 2:
+            self.surf = font.render(self.symbol, True, (0, 143, 17))
+        if self.age == self.age_of_chain - 3:
+            self.surf = font.render(self.symbol, True, (0, 59, 0))
+        if self.age == 2 or self.age == 1:
+            self.surf = font.render(self.symbol, True, (13, 20, 8))
 
 pygame.init()
 
@@ -134,16 +154,12 @@ clock = pygame.time.Clock()
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
-ADDENEMY = pygame.USEREVENT + 1
-pygame.time.set_timer(ADDENEMY, 250)
-
 # Custom event to create a new symbol
-ADDSYMBOL = pygame.USEREVENT + 2
-pygame.time.set_timer(ADDSYMBOL, 690)
-
+ADDSYMBOL = pygame.USEREVENT + 1
+pygame.time.set_timer(ADDSYMBOL, 150)
 # Custom event to create a new chain of symbols
-CREATECHAIN = pygame.USEREVENT + 3
-pygame.time.set_timer(CREATECHAIN, 1000)
+CREATECHAIN = pygame.USEREVENT + 2
+pygame.time.set_timer(CREATECHAIN, 300)
 
 player = Player()
 
@@ -167,7 +183,7 @@ while running:
             # Adds another symbol to every chain and makes it the new end of chain, 
             # whilst removing the previous one from the group
             for entity in chain:
-                new_symbol = Symbol(entity.x_cord, entity.y_cord + 25, entity.age_of_chain)
+                new_symbol = Symbol(entity.x_cord, entity.y_cord + (FONT_SIZE - 15), entity.age_of_chain)
                 symbols.add(new_symbol)
                 chain.add(new_symbol)
                 all_sprites.add(new_symbol)
@@ -188,16 +204,17 @@ while running:
     enemies.update()
     symbols.update()
     
-    screen.fill((13, 2, 8))
+    screen.fill((0, 0, 0))
 
     for entity in all_sprites:
         screen.blit(entity.surf, entity.rect)
     screen.blit(player.hitbox, player.rect_hitbox)
     
+    # Game ends when you touch a symbol
     if pygame.sprite.spritecollideany(player, symbols):
         running = False
 
     pygame.display.flip()
-    clock.tick(30)
+    clock.tick(60)
 
 pygame.quit()
