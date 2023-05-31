@@ -8,6 +8,7 @@ from pygame.locals import (
     K_RIGHT,
     K_ESCAPE,
     KEYDOWN,
+    KEYUP,
     QUIT,
     K_w,
     K_a,
@@ -47,18 +48,20 @@ class Player(pygame.sprite.Sprite):
 
     # Basic movement
     def update(self, pressed_keys):
+        speed = 15 * speed_modifier  
+
         if pressed_keys[K_w]:
-            self.rect.move_ip(0, -15)
-            self.rect_hitbox.move_ip(0, -15)
+            self.rect.move_ip(0, -speed)
+            self.rect_hitbox.move_ip(0, -speed)
         if pressed_keys[K_s]:
-            self.rect.move_ip(0, 15)
-            self.rect_hitbox.move_ip(0, 15)
+            self.rect.move_ip(0, speed)
+            self.rect_hitbox.move_ip(0, speed)
         if pressed_keys[K_a]:
-            self.rect.move_ip(-15, 0)
-            self.rect_hitbox.move_ip(-15, 0)
+            self.rect.move_ip(-speed, 0)
+            self.rect_hitbox.move_ip(-speed, 0)
         if pressed_keys[K_d]:
-            self.rect.move_ip(15, 0)
-            self.rect_hitbox.move_ip(15, 0)
+            self.rect.move_ip(speed, 0)
+            self.rect_hitbox.move_ip(speed, 0)
 
         # Teleportation ability 
         teleport_distance = 500  # Distance to teleport
@@ -170,12 +173,18 @@ clock = pygame.time.Clock()
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
+# Speed of game
+speed_modifier = 1 # Normal
+
 # Custom event to create a new symbol
 ADDSYMBOL = pygame.USEREVENT + 1
-pygame.time.set_timer(ADDSYMBOL, 300)
+symbol_interval = 300  # ms
+pygame.time.set_timer(ADDSYMBOL, int(symbol_interval / speed_modifier))
+
 # Custom event to create a new chain of symbols
 CREATECHAIN = pygame.USEREVENT + 2
-pygame.time.set_timer(CREATECHAIN, 600)
+chain_interval = 600  # ms
+pygame.time.set_timer(CREATECHAIN, int(chain_interval / speed_modifier))
 
 player = Player()
 
@@ -192,9 +201,21 @@ while running:
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
                 running = False
+            elif event.key == K_LSHIFT:
+                # Decrease game speed when LSHIFT is pressed
+                speed_modifier = 0.4
+                # Adjust symbol and chain event timers
+                pygame.time.set_timer(ADDSYMBOL, int(symbol_interval / speed_modifier))
+                pygame.time.set_timer(CREATECHAIN, int(chain_interval / speed_modifier))
+        elif event.type == KEYUP:
+            if event.key == K_LSHIFT:
+                # Restore normal game speed when LSHIFT is released
+                speed_modifier = 1
+                # Adjust symbol and chain event timers
+                pygame.time.set_timer(ADDSYMBOL, int(symbol_interval / speed_modifier))
+                pygame.time.set_timer(CREATECHAIN, int(chain_interval / speed_modifier))
         elif event.type == QUIT:
             running = False
-
         elif event.type == ADDSYMBOL:
             # Adds another symbol to every chain and makes it the new end of chain, 
             # whilst removing the previous one from the group
@@ -221,6 +242,11 @@ while running:
     symbols.update()
     
     screen.fill((0, 0, 0))
+
+    # Adjust the game speed based on the speed modifier
+    speed_adjusted = int(speed_modifier * 60)
+    clock.tick(speed_adjusted)
+
 
     for entity in all_sprites:
         screen.blit(entity.surf, entity.rect)
