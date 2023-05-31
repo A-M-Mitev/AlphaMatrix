@@ -21,9 +21,14 @@ FONT_SIZE = 40
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super(Player, self).__init__()
-        #self.surf = pygame.Surface((75, 25))
+        self.hitbox = pygame.Surface((75, 25))
+        self.rect_hitbox = self.hitbox.get_rect(
+            center=(
+            SCREEN_HEIGHT/2, 
+            SCREEN_WIDTH/2
+            )
+        )
         self.surf = pygame.image.load("Average_red_pill_enjoyer.png").convert_alpha()
-        #self.surf.fill((0, 255, 65))
         self.rect = self.surf.get_rect(
             center=(
             SCREEN_HEIGHT/2, 
@@ -34,15 +39,17 @@ class Player(pygame.sprite.Sprite):
     def update(self, pressed_keys):
         if pressed_keys[K_UP]:
             self.rect.move_ip(0, -10)
+            self.rect_hitbox.move_ip(0, -10)
         if pressed_keys[K_DOWN]:
           self.rect.move_ip(0, 10)
+          self.rect_hitbox.move_ip(0, 10)
         if pressed_keys[K_LEFT]:
           self.rect.move_ip(-10, 0)
+          self.rect_hitbox.move_ip(-10, 0)
         if pressed_keys[K_RIGHT]:
            self.rect.move_ip(10, 0)
-        if pressed_keys[K_e]:
-            symbol = random.randint(33, 126)
-            print(chr(symbol))
+           self.rect_hitbox.move_ip(10, 0)
+    
         # Window borders
         if self.rect.left < 0:
             self.rect.left = 0
@@ -80,14 +87,14 @@ class Symbol(pygame.sprite.Sprite):
     def __init__(self, x_cord, y_cord):
         super(Symbol, self).__init__()
         self.x_cord = x_cord
-        self.y_cord = y_cord
+        self.y_cord = y_cord + 25
         # Random symbol from the ASCII table (33->'!'; 126->'`')
         symbol = chr(random.randint(33, 126))
         self.surf = font.render(symbol, True, (0, 255, 65))
         self.rect = self.surf.get_rect()
         self.rect.center=(
             x_cord,
-            y_cord + 25
+            y_cord
         )
 
 # Starts a chain of symbols from the top
@@ -110,6 +117,7 @@ class Chain(pygame.sprite.Sprite):
     def update(self):
         if not self.end_of_chain:
             self.remove(chain)
+            self.kill
 
 pygame.init()
 
@@ -124,7 +132,7 @@ pygame.time.set_timer(ADDENEMY, 250)
 
 # Custom event to create a new symbol
 ADDSYMBOL = pygame.USEREVENT + 2
-pygame.time.set_timer(ADDSYMBOL, 450)
+pygame.time.set_timer(ADDSYMBOL, 1200)
 
 # Custom event to create a new chain of symbols
 CREATECHAIN = pygame.USEREVENT + 3
@@ -147,20 +155,18 @@ while running:
                 running = False
         elif event.type == QUIT:
             running = False
-        elif event.type == ADDENEMY:
-            new_enemy = Enemy()
-            enemies.add(new_enemy)
-            all_sprites.add(new_enemy)
+
+        # Adds another symbol to every chain and makes it the new end of chain, 
+        # whilst removing the previous one from the group
         elif event.type == ADDSYMBOL:
-            #new_symbol = Symbol()
-            #symbols.add(new_symbol)
-            #all_sprites.add(new_symbol)
-            # Add another symbol to every chain
             for entity in chain:
                 new_symbol = Symbol(entity.x_cord, entity.y_cord)
+                symbols.add(new_symbol)
                 chain.add(new_symbol)
                 all_sprites.add(new_symbol)
-                entity.end_of_chain = False
+                chain.remove(entity)
+
+        # Starts a new chain of symbols        
         elif event.type == CREATECHAIN:
             new_chain = Chain()
             chain.add(new_chain)
@@ -169,14 +175,13 @@ while running:
     pressed_keys = pygame.key.get_pressed()
     player.update(pressed_keys)
     enemies.update()
-    chain.update()
     
     screen.fill((13, 2, 8))
 
     for entity in all_sprites:
         screen.blit(entity.surf, entity.rect)
     
-    if pygame.sprite.spritecollideany(player, chain):
+    if pygame.sprite.spritecollideany(player, symbols):
         running = False
 
     pygame.display.flip()
