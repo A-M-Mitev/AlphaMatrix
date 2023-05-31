@@ -82,12 +82,12 @@ class Enemy(pygame.sprite.Sprite):
         if self.rect.right < 0:
             self.kill()
 
-# Creates a random symbol at a random place 
+# Places a random symbol on given cordinates
 class Symbol(pygame.sprite.Sprite):
     def __init__(self, x_cord, y_cord):
         super(Symbol, self).__init__()
         self.x_cord = x_cord
-        self.y_cord = y_cord + 25
+        self.y_cord = y_cord 
         # Random symbol from the ASCII table (33->'!'; 126->'`')
         symbol = chr(random.randint(33, 126))
         self.surf = font.render(symbol, True, (0, 255, 65))
@@ -160,7 +160,7 @@ while running:
         # whilst removing the previous one from the group
         elif event.type == ADDSYMBOL:
             for entity in chain:
-                new_symbol = Symbol(entity.x_cord, entity.y_cord)
+                new_symbol = Symbol(entity.x_cord, entity.y_cord + 25)
                 symbols.add(new_symbol)
                 chain.add(new_symbol)
                 all_sprites.add(new_symbol)
